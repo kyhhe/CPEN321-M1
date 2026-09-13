@@ -31,6 +31,9 @@ navigation = "2.8.8"
 credentials = "1.6.0"
 googleid = "1.2.0"
 
+# WebScoket Client
+okhttp = "4.12.0"
+
 # Test
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -57,6 +60,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
