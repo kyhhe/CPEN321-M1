@@ -9,20 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 
-
-data class SurpriseData(
-    val imageUrl: String,
-    val text: String
-)
-
 data class TimerUiState(
     val minutesInput: String = "0",
     val secondsInput: String = "30",
     val remainingMillis: Long = 0L,
     val isRunning: Boolean = false,
     val isFinished: Boolean = false,
-    val isLoadingSurprise: Boolean = false,
-    val surprise: SurpriseData? = null,
+    val isPokeballOpened: Boolean = false,
+    val showingCollection: Boolean = false,
     val error: String? = null
 )
 
@@ -59,7 +53,6 @@ class TimerViewModel : ViewModel() {
             remainingMillis = totalMillis,
             isRunning = true,
             isFinished = false,
-            surprise = null,
             error = null
         )
 
@@ -71,7 +64,6 @@ class TimerViewModel : ViewModel() {
                 _uiState.value = _uiState.value.copy(remainingMillis = next)
             }
             _uiState.value = _uiState.value.copy(isRunning = false, isFinished = true)
-            fetchSurprise()
         }
     }
 
@@ -81,23 +73,17 @@ class TimerViewModel : ViewModel() {
             remainingMillis = 0L,
             isRunning = false,
             isFinished = false,
-            isLoadingSurprise = false,
-            surprise = null,
+            isPokeballOpened = false,
+            showingCollection = false,
             error = null
         )
     }
 
-    private fun fetchSurprise() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoadingSurprise = true)
-            delay(1000)
-            _uiState.value = _uiState.value.copy(
-                isLoadingSurprise = false,
-                surprise = SurpriseData(
-                    imageUrl = "https://via.placeholder.com/150",
-                    text = "Placeholder surprise"
-                )
-            )
-        }
+    fun openPokeball() {
+        _uiState.value = _uiState.value.copy(isPokeballOpened = true)
+    }
+
+    fun showCollection(show: Boolean) {
+        _uiState.value = _uiState.value.copy(showingCollection = show)
     }
 }
