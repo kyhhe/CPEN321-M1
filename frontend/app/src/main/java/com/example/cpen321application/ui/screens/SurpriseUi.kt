@@ -6,6 +6,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -16,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -28,11 +30,11 @@ import com.example.cpen321application.viewmodel.SurpriseViewModel
 import kotlinx.coroutines.delay
 
 // Border color for pokemon card based on rarity
-fun rarityColor(rarity: Rarity): Color = when (rarity) {
+fun rarityColor(rarity: Rarity, isDark: Boolean): Color = when (rarity) {
     Rarity.COMMON -> Color(0xFF9E9E9E)     // Grey
-    Rarity.RARE -> Color(0xFF4A90D9)       // Blue
-    Rarity.EPIC -> Color(0xFF9B59B6)       // Purple
-    Rarity.EXCLUSIVE -> Color(0xFFFFD700)  // Gold
+    Rarity.RARE -> if (isDark) Color(0xFF4A90D9) else Color(0xFF1976D2)  // Blue
+    Rarity.EPIC -> if (isDark) Color(0xFFBB86FC) else Color(0xFF7B1FA2)  // Purple
+    Rarity.EXCLUSIVE -> if (isDark) Color(0xFFFFD700) else Color(0xFFF57C00) // Gold/Orange
 }
 
 // Pokeball sprite
@@ -62,7 +64,8 @@ private fun RevealedPokemonCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
-    val borderColor = rarityColor(pokemon.rarity)
+    val isDark = isSystemInDarkTheme()
+    val borderColor = rarityColor(pokemon.rarity, isDark)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.let { if (onClick != null) it.clickable { onClick() } else it }
@@ -77,7 +80,8 @@ private fun RevealedPokemonCard(
             AsyncImage(
                 model = pokemon.spriteUrl,
                 contentDescription = pokemon.name,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                filterQuality = FilterQuality.None
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -89,6 +93,7 @@ private fun RevealedPokemonCard(
 // Pokemon details card
 @Composable
 fun PokemonDetailDialog(pokemon: CaughtPokemon, onDismiss: () -> Unit) {
+    val isDark = isSystemInDarkTheme()
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -102,13 +107,14 @@ fun PokemonDetailDialog(pokemon: CaughtPokemon, onDismiss: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(160.dp)
-                        .border(width = 2.dp, color = rarityColor(pokemon.rarity), shape = RoundedCornerShape(16.dp))
+                        .border(width = 2.dp, color = rarityColor(pokemon.rarity, isDark), shape = RoundedCornerShape(16.dp))
                         .padding(8.dp)
                 ) {
                     AsyncImage(
                         model = pokemon.spriteUrl,
                         contentDescription = pokemon.name,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        filterQuality = FilterQuality.None
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -254,7 +260,7 @@ fun SurpriseCollectionScreen(
         Row {
             Button(onClick = onBack) { Text("Back") }
             Spacer(modifier = Modifier.width(8.dp))
-            OutlinedButton(onClick = onClearAll) { Text("Clear All") }
+            Button(onClick = onClearAll) { Text("Clear All") }
         }
     }
 }
