@@ -10,11 +10,7 @@ export function createApp(): Express {
 
   // Button 1 APIs
   app.get('/server-ip', (_req, res) => {
-    if (process.env.PUBLIC_IP) {
-      res.json({ ip: process.env.PUBLIC_IP });
-    } else {
-      res.json({ ip: getLocalIp() });
-    }
+    res.json({ ip: process.env.PUBLIC_IP || getLocalIp() });
   });
 
   app.get('/server-time', (_req, res) => {
