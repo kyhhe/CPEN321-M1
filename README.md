@@ -1,4 +1,4 @@
-# CPEN321 Milestone 1
+# CPEN321 M1 - App skeleton
 
 _Setup, build, and run instructions for CPEN 321 M1._
 
@@ -66,8 +66,22 @@ JWT_SECRET=your_jwt_secret_key_here
 The database unused and can be left blank.
 
 
-#### Option A: Run via Docker (Using Dockerfile)
-Build and run the standalone backend container directly:
+#### Option A: Run via Script
+Spins up the container and verifies health status automatically:
+```bash
+# Unix (macOS / Linux):
+./scripts/run-backend.sh
+
+# Windows (PowerShell):
+.\scripts\run-backend.ps1
+```
+To stop the backend container:
+```bash
+docker compose down
+```
+
+#### Option B: Run via Docker Directly (Using `backend/Dockerfile`)
+Build and run the standalone container directly:
 ```bash
 cd backend
 
@@ -83,7 +97,7 @@ To stop the container:
 docker stop cpen321-backend && docker rm cpen321-backend
 ```
 
-#### Option B: Run Directly with Node.js
+#### Option C: Run Directly with Node.js
 ```bash
 cd backend
 npm install
@@ -117,16 +131,24 @@ GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 ```
 
 #### Build & Run
-- **Via Android Studio:**
+
+- **Option A: Run via Automated Script (Recommended)**
+  Automatically boots the emulator (defaults to `Pixel_9` or uses whichever emulator is already running), builds the debug APK, installs it, and launches the app:
+  ```bash
+  # Unix (macOS / Linux):
+  ./scripts/run-frontend.sh
+
+  # Windows (PowerShell):
+  .\scripts\run-frontend.ps1
+  ```
+
+- **Option B: Run via Android Studio:**
   1. Open the `frontend/` folder in Android Studio.
   2. Sync Gradle dependencies (`File -> Sync Project with Gradle Files`).
   3. Select your emulator/device and click **Run** (Green play button).
-- **Via Command Line:**
-  ```bash
-  # Run automated launch script:
-  ./scripts/run-frontend.sh
 
-  # Or build APKs manually:
+- **Option C: Build APKs Manually via Gradle:**
+  ```bash
   cd frontend
   ./gradlew assembleDebug
   ```
@@ -143,6 +165,7 @@ Once the app is launched (either via the pre-built APK or local build), test the
 - Tap **"Sign in with Google"** and complete authentication.
 - Verifies display of:
   - **Server IP Address** & **Server Local Time** (retrieved from backend `/server-ip` and `/server-time`).
+     - Note: The cloud-hosted backend server should be in GMT+00:00
   - **Client IP Address** & **Client Local Time** (queried on device).
   - **Developer Name** (retrieved from backed `/my-name`).
   - **Authenticated User Name** (retrieved from Google ID token).
@@ -155,7 +178,7 @@ Once the app is launched (either via the pre-built APK or local build), test the
 ### Button 3: Timer & Surprise (Pokémon Gacha)
 - Tap **"Timer & Surprise"**.
 - Enter a duration (e.g. 0 min, 5 sec) and tap **"Start Timer"**.
-- Once the countdown reaches 00:00, Pokéball appears.
+- Once the countdown reaches 00:00, a Pokéball appears.
 - Tap the Pokéball to trigger a sequence of shake animations, followed by an opening burst.
 - A Pokémon is pulled using a 4-tier gacha system (`3★ Common`, `4★ Rare`, `5★ Epic`, `6★ Exclusive`) queried from PokéAPI.
 - Tap the card to inspect details (Type, Height, Weight, BST) and tap **"View Collection"** to view all saved Pokémon persisted via SharedPreferences.
