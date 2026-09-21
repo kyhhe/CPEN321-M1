@@ -1,126 +1,163 @@
-# CPEN321_26W1_ProjectName
+# CPEN321 Milestone 1
 
-_Keep this README up to date with the steps required to build and run the frontend and backend (including any scripts, config files, and environment variables). TAs ill follow these instructions._
+_Setup, build, and run instructions for CPEN 321 M1._
 
-## Requirements
-
-Install the following before the frontend or backend setup steps:
-
-- [git](https://git-scm.com/install/)
-
-
---- 
-
-## Frontend Setup
-
-### Requirements
-
-- [Android Studio](https://developer.android.com/studio) (latest version)
-- [Java 17](https://adoptium.net/temurin/releases/?version=17)
-- [Android SDK](https://developer.android.com/studio#command-tools) with API level 36+ (Android 16)
-
-### Setup
-
-1. **Open project**: Open the `frontend/` directory in Android Studio
-2. **Sync Gradle**: Android Studio will automatically prompt you to sync the project. Click "Sync Now". You can also manually run `cd frontend && ./gradlew build` to trigger the sync and download the necessary dependencies.
-3. **Configure Android SDK**: Ensure you have Android SDK 36 installed.
-4. **Set up emulator/device**:
-   - Create a new AVD (Android Virtual Device) by selecting Pixel 9 as the device and Android Baklava (API level 36) as the system image.
-   - Alternatively, connect a physical Android device running Android 16 (API level 36).
-5. **Setup app config**: Copy the example file, then fill in local values:
-   ```bash
-   cp frontend/local.properties.example frontend/local.properties
-   ```
-   Set at least:
-   - `sdk.dir`: path to your Android SDK. Android Studio usually writes this the first time you open `frontend/`. On Mac it is often `sdk.dir=/Users/<username>/Library/Android/sdk`.
-   - `API_BASE_URL`: backend URL baked into the APK. Use `http://10.0.2.2:3000` for the emulator (`10.0.2.2` is the host machine). For a physical device on the same Wi-Fi, use `http://<your-lan-ip>:3000`.
-
-
-### Build and Run
-
-- **Debug build**: Click the green play button in the toolbar, to compile the code, package a debug APK, and install it on the connected device or running emulator. Alternatively, from the project root, run `./scripts/run-frontend.sh`.
-- **Release build**: Go to Build -> Generate Signed App Bundle or APK -> APK. Follow the on-screen instructions to create a key, and select the "release" build variant. You will then have to manually install the generated APK on your device or the running emulator.
-
-
-### Backend Configuration
-
-Ensure the backend server is running and update the base URL in the app configuration if needed.
+This repository supports two ways to run and evaluate the application:
+1. **[Method 1: Pre-built APK + Hosted Cloud Backend](#method-1-pre-built-apk--hosted-cloud-backend)**: No local backend or Android build setup required.
+2. **[Method 2: Run Full Stack Locally on Your Own Machine](#method-2-run-full-stack-locally-on-your-machine)**: Run the backend and build/run the Android app entirely on localhost.
 
 ---
-## Backend Setup
 
-You can run the backend in one of two ways:
-* Locally via Node.js 
-* Via Docker Compose
+## Method 1: Pre-built APK + Hosted Cloud Backend
 
-Both ways use the same `backend/.env` file (see below).
+Use this method to evaluate the application immediately without installing Node.js, Docker, or building Android source code.
 
-### Environment configuration
+### 1. Prerequisites
+- An active Android Emulator OR a physical Android device.
+   - Note: This app has only been tested on the **Pixel 9** as the device and **Android Baklava (API level 36)** as the system image, as indicated in the submission guidelines
+- [Android Platform Tools (`adb`)](https://developer.android.com/tools/releases/platform-tools) installed (or Android Studio running an emulator).
 
-From the project root:
+### 2. Verify Cloud Backend Status
+The backend is continuously hosted on a Google Cloud Compute Engine VM (`e2-micro`, Ubuntu 24.04).
+- **HTTP Health Check:** Open [http://136.67.224.94:3000/health](http://136.67.224.94:3000/health) in your browser.  
+  Expected response: `{"status":"ok"}`
+- **WebSocket Stream Relay:** Active on `ws://136.67.224.94:3000/pixels`.
 
+### 3. Install and Run the APK
+The pre-built release APK is compiled configured to communicate with the hosted cloud backend.
+
+- **Location:** `M1_Release.apk` in the repository root
+- **Installation**
+  1. Start your Android Emulator.
+  2. Drag `M1_Release.apk` from your file explorer and drop it onto the emulator screen. The app **CPEN321 Application** will install automatically, or 
+  ```bash
+  adb install M1_Release.apk
+  ```
+- **Launch the app**
+
+---
+
+## Method 2: Run Full Stack Locally on Your Machine
+
+Use this method if you want to inspect, modify, and run both the backend and frontend locally.
+
+### 1. Prerequisites
+- [Git](https://git-scm.com/install/)
+- [Node.js](https://nodejs.org/en/download/) (v22+) & [npm](https://docs.npmjs.com/) (v10+)
+- [Docker](https://docs.docker.com/desktop/) (optional, if running backend in a container)
+- [Java 17](https://adoptium.net/temurin/releases/?version=17) (JDK 17)
+- [Android Studio](https://developer.android.com/studio) with Android SDK Platform 35
+
+---
+
+### 2. Start the Local Backend
+
+#### Configure Environment
+Copy the example environment file:
 ```bash
 cp backend/.env.example backend/.env
 ```
+Ensure `backend/.env` has:
+```dotenv
+PORT=3000
+NODE_ENV=development
+JWT_SECRET=your_jwt_secret_key_here
+```
+The database unused and can be left blank.
 
-Set at least:
-- `JWT_SECRET`: a long random string used to sign auth tokens.
-- `MONGODB_URI`: only needed for local development (default in `.env.example` assumes MongoDB on `localhost:27017`). Ignored when running via Docker Compose.
-- `PORT` (optional): defaults to `3000` if unset.
 
+#### Option A: Run via Docker (Using Dockerfile)
+Build and run the standalone backend container directly:
+```bash
+cd backend
 
-### Option 1: Run locally
+# Build Docker image:
+docker build -t cpen321-backend .
 
-**Requirements:** 
-- [Node.js](https://nodejs.org/en/download/) 22+
-- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 10+
+# Run container on port 3000:
+docker run -d --name cpen321-backend -p 3000:3000 --env-file .env cpen321-backend
+```
 
-**Setup:** 
-1. Install dependencies:
+To stop the container:
+```bash
+docker stop cpen321-backend && docker rm cpen321-backend
+```
 
-   ```bash
-   cd backend
-   npm install
-   ```
+#### Option B: Run Directly with Node.js
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-2. **Development** (TypeScript with auto-reload):
+Verify the local backend is up: [http://localhost:3000/health](http://localhost:3000/health)
 
-   ```bash
-   npm run dev
-   ```
+---
 
-3. **Production build** (optional):
+### 3. Configure & Run the Frontend
 
-   ```bash
-   npm run build
-   npm start
-   ```
+#### Configure `local.properties`
+Create `frontend/local.properties` (gitignored):
+```bash
+cp frontend/local.properties.example frontend/local.properties
+```
 
-### Option 2: Run with Docker Compose
+Edit `frontend/local.properties`:
+```properties
+# Path to your Android SDK:
+sdk.dir=/path/to/Android/sdk
 
-**Requirements:** 
-- [Docker](https://docs.docker.com/desktop/setup/install) and [Docker Compose](https://docs.docker.com/desktop/setup/install) v2.24+
-- [curl](https://curl.se/download.html)
+# Points to your local machine from the Android Emulator:
+API_BASE_URL=http://10.0.2.2:3000
 
-**Setup**
-1. **Start** (from the project root):
+# (If testing on a physical device on the same Wi-Fi, use your machine's LAN IP, e.g. http://192.168.1.50:3000)
 
-   ```bash
-   ./scripts/run-backend.sh
-   ```
+# Google Android OAuth Client ID for Credential Manager:
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+```
 
-   Or run Compose directly:
+#### Build & Run
+- **Via Android Studio:**
+  1. Open the `frontend/` folder in Android Studio.
+  2. Sync Gradle dependencies (`File -> Sync Project with Gradle Files`).
+  3. Select your emulator/device and click **Run** (Green play button).
+- **Via Command Line:**
+  ```bash
+  # Run automated launch script:
+  ./scripts/run-frontend.sh
 
-   ```bash
-   docker compose up --build -d
-   ```
+  # Or build APKs manually:
+  cd frontend
+  ./gradlew assembleDebug
+  ```
 
-2. **Stop**:
+---
 
-   ```bash
-   docker compose down
-   ```
+## Features
 
-## Additional Setup
+Once the app is launched (either via the pre-built APK or local build), test the three main components:
 
-_Please specify any other additional setup steps non-specific to either frontend nor backend_
+### Button 1: Login & Connect
+*Ensure there is a Google Account on the device. Sign in to a valid Google account through the Play Store prior to testing this button* 
+- Tap **"Login & Connect"**.
+- Tap **"Sign in with Google"** and complete authentication.
+- Verifies display of:
+  - **Server IP Address** & **Server Local Time** (retrieved from backend `/server-ip` and `/server-time`).
+  - **Client IP Address** & **Client Local Time** (queried on device).
+  - **Developer Name** (retrieved from backed `/my-name`).
+  - **Authenticated User Name** (retrieved from Google ID token).
+
+### Button 2: Live Pixel Art
+- Tap **"Live Pixel Art"**.
+- The backend connects to the upstream course WebSocket (`ws://8.229.22.124`) and streams pixel updates (`{x, y, color}`) to the client.
+- Verifies real-time incremental assembly of a 16x16 pixel art image on a Jetpack Compose Canvas.
+
+### Button 3: Timer & Surprise (Pokémon Gacha)
+- Tap **"Timer & Surprise"**.
+- Enter a duration (e.g. 0 min, 5 sec) and tap **"Start Timer"**.
+- Once the countdown reaches 00:00, Pokéball appears.
+- Tap the Pokéball to trigger a sequence of shake animations, followed by an opening burst.
+- A Pokémon is pulled using a 4-tier gacha system (`3★ Common`, `4★ Rare`, `5★ Epic`, `6★ Exclusive`) queried from PokéAPI.
+- Tap the card to inspect details (Type, Height, Weight, BST) and tap **"View Collection"** to view all saved Pokémon persisted via SharedPreferences.
+
+---
