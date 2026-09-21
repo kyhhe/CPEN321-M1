@@ -20,10 +20,10 @@ Use this method to evaluate the application immediately without installing Node.
 The backend is continuously hosted on a Google Cloud Compute Engine VM (`e2-micro`, Ubuntu 24.04).
 - **HTTP Health Check:** Open [http://136.67.224.94:3000/health](http://136.67.224.94:3000/health) in your browser.  
   Expected response: `{"status":"ok"}`
-- **WebSocket Stream Relay:** Active on `ws://136.67.224.94:3000/pixels`.
+- **WebSocket Stream Relay:** Active on `ws://136.67.224.94:3000/live-updates`.
 
 ### 3. Install and Run the APK
-The pre-built release APK is compiled configured to communicate with the hosted cloud backend.
+The pre-built release APK is compiled and configured to communicate with the hosted cloud backend.
 
 - **Location:** `M1_Release.apk` in the repository root
 - **Installation**
