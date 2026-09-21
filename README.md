@@ -1,5 +1,4 @@
-# CPEN321 Milestone 1
-
+# CPEN321 M1 - App skeleton
 _Setup, build, and run instructions for CPEN 321 M1._
 
 This repository supports two ways to run and evaluate the application:
